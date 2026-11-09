@@ -42,12 +42,14 @@ homework. MCIB treats the verdict as the deliverable.
 
 ## Status — read this before citing anything here
 
-MCIB is a new project. It has produced no measurements yet. Everything in this
-repository is either specification or plan, and each claim is labelled.
+MCIB is a new project. It has produced no measurements yet. Its harness has
+been validated on a Raspberry Pi 4B under PREEMPT_RT; everything else in this
+repository is specification or plan, and each claim is labelled.
 
 | Tier | What exists | Where |
 |---|---|---|
 | **Measured** | *(nothing yet)* | — |
+| **Validated** | Benchmark harness on Raspberry Pi 4B under PREEMPT_RT (no benchmark results) | `framework/` |
 | **Specified** | Interference-channel taxonomy, instrument-agnostic attribution protocol, results schema with mandatory provenance | `spec/` |
 | **Planned** | Campaign #1 (Renesas R-Car V4H); Campaign #2 (ROS-native capture) | `campaigns/` |
 
@@ -64,8 +66,8 @@ World 2026). That work is **not** MCIB's data, and MCIB shares no code with
 it. It measured POSIX primitives on Arm Cortex-A72 with no AI inference
 workload present. Two things it surfaced led to this project:
 
-1. Worst-case tails run two to three orders of magnitude above median, and
-   P99.9 is not a safe WCET bound.
+1. Worst-case tails reached up to about 90× the median, and P99.9 is not a
+   safe WCET bound.
 2. It characterised *that* the tails occur, not *why*. Attributing them to
    microarchitectural mechanisms was left as follow-on work.
 
@@ -90,7 +92,7 @@ load-bearing and is enforced throughout the specification.
 spec/         Interference taxonomy, attribution protocol, results schema
 campaigns/    Per-platform measurement campaign plans
 docs/         Background notes, problem framing, regulatory context
-framework/    Benchmark harness (skeleton — see Status)
+framework/    Benchmark harness (see Status)
 ```
 
 ---

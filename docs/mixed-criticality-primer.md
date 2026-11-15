@@ -11,7 +11,7 @@ SoC is running two workloads with incompatible characteristics:
 
 | | Inference domain | Control domain |
 |---|---|---|
-| Cadence | ~1–10 Hz, best-effort | sub-millisecond, hard deadline |
+| Cadence | best-effort; rate varies by model and sensor | sub-millisecond, hard deadline |
 | Failure mode | degraded output | loss of control authority |
 | Resource behaviour | bursty, memory-hungry | small, predictable, latency-sensitive |
 
@@ -42,24 +42,26 @@ preemption around 1.5 µs, thread-mode IPC around 5.4 µs — and they barely mo
 across stressor profiles. P99.9 across all five metrics stays under 57 µs.
 
 Maxima tell a different story. Task-switch latency reaches 140–168 µs against a
-2.5 µs median. Process-mode inter-task messaging reaches 595 µs, three orders of
-magnitude above its median. Mutex acquisition under balanced stress shows a
+2.5 µs median. Process-mode inter-task messaging reaches 595 µs, about 90× its
+median. Mutex acquisition under balanced stress shows a
 max/min ratio above 1,100×.
 
 Two conclusions follow, and both matter more than the numbers.
 
-**P99.9 is not a WCET bound.** A percentile that looks comfortable can sit two
-orders of magnitude below the observed maximum. Any timing argument resting on
-P99.9 alone is resting on sand.
+**P99.9 is not a WCET bound.** A percentile that looks comfortable can sit well
+over an order of magnitude below the observed maximum (about 38× in the
+published process-messaging data). Any timing argument resting on P99.9 alone
+is resting on sand.
 
 **Isolation policy is not optional, and it is not partial.** The published work
-found that the full policy set — CPU isolation, tickless operation, RCU
-offloading, RT throttling disabled, and interrupt affinity — must be applied
-together. Omitting any one still produces spikes two to three orders of
-magnitude above median. Isolation without tickless configuration, for instance,
-still admits timer-tick interrupts on the supposedly isolated core.
+reports that CPU isolation, tickless operation, RCU offloading, disabled RT
+throttling and interrupt affinity need to be applied together, and that
+isolation without tickless configuration still admits timer-tick interrupts on
+the supposedly isolated core. It does not tabulate per-omission comparison
+runs, so read this as configuration guidance rather than a measured effect
+size.
 
-With the full policy enforced, tail behaviour is bounded.
+The maxima above are observed values, not a proven bound.
 
 ---
 
@@ -184,7 +186,9 @@ evidence. Characterisation data can be an input to a safety argument that a
 qualified party assembles. The distinction is deliberate.
 
 See the [project README](../README.md) for current status, including what has
-been measured and what has not.
+been measured and what has not. For the wider argument, that every boundary on
+the sensor-to-actuator path needs an explicit timing contract, see
+[From chain of trust to chain of time](https://zlhk100.github.io/library/chain-of-time.html).
 
 ---
 

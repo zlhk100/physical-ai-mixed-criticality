@@ -188,7 +188,7 @@ qualified party assembles. The distinction is deliberate.
 See the [project README](../README.md) for current status, including what has
 been measured and what has not. For the wider argument, that every boundary on
 the sensor-to-actuator path needs an explicit timing contract, see
-[From chain of trust to chain of time](https://zlhk100.github.io/library/chain-of-time.html).
+[From chain of trust to chain of timing](https://zlhk100.github.io/library/chain-of-timing.html).
 
 ---
 

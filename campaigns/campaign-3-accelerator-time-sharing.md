@@ -19,43 +19,44 @@ consolidated platform with a shared GPU has to answer:
 > GPU work still meet its deadline — and if not, is that fixable by
 > configuration, by a partitioning mechanism, or not at all?
 
-Existing practice answers this by demonstration ("the cluster looked smooth
-while the infotainment ran a game"). This campaign answers it with a
+Existing practice answers this by demonstration ("the critical display looked
+smooth while the guest ran a game"). This campaign answers it with a
 deadline-miss distribution, an attribution of each miss class, and one of
 the three MCIB verdicts.
 
-## Use case
+## Reference scenario
 
-**Consolidated digital cockpit on one SoC with one GPU.** The GPU has no
-hardware partitioning. Two domains share it:
+The scenario is the textbook case for GPU sharing: one GPU without hardware
+partitioning, used by a domain with a deadline and a domain without one.
+Consolidated vehicle cockpits are the most familiar instance, so the
+campaign uses a generic one:
 
 | Domain | Workload | Criticality of its GPU path |
 |---|---|---|
-| Instrument cluster | Gauges and driver information rendered at the panel rate, composited on the host | Availability-critical. Safety telltales are *not* on this path (see the reference arm) |
-| Infotainment (IVI) | An Android Automotive-class guest VM: UI, navigation, media, games, on-device inference | Non-critical; may drive the GPU to saturation at any time |
+| Critical display domain (e.g. an instrument cluster) | Content rendered at the panel rate and composited on the host | Availability-critical. Safety telltales are *not* on this path (see the reference arm) |
+| General-purpose guest VM | A rich guest OS: UI, media, games, on-device inference | Non-critical; may drive the GPU to saturation at any time |
 
 The guest reaches the GPU through API forwarding (virtio-gpu with a
 Vulkan-forwarding backend such as Venus or gfxstream). Every guest command
 therefore executes on the host GPU driver on the guest's behalf, in the same
-driver and firmware scheduler as the cluster's own work.
+driver and firmware scheduler as the critical domain's own work.
 
-**Requirement shape** (values are campaign defaults, not claims about any
-product):
+**Evaluation criteria** (campaign defaults, not claims about any product):
 
-| ID | Requirement | Default `[REFERENCE]` |
+| ID | Criterion | Default `[REFERENCE]` |
 |---|---|---|
-| R1 | Cluster frame completes before its scanout deadline | 60 Hz panel: 16.67 ms period |
-| R2 | R1 holds while the guest's GPU load is swept from idle to saturation | Sweep in declared steps; saturation = guest workload GPU-bound with no frame pacing |
-| R3 | Deadline-miss ratio below a declared bound, with misses attributed | Bound declared per run, never inferred from data |
-| R4 | The guest is not starved: its throughput under arbitration is reported against its unarbitrated throughput | Reported, not pass/fail |
-| R5 | After a guest burst ends, the cluster returns to zero misses within a declared number of frames | Declared per run |
-| R6 | Host CPU cost of the arbitration mechanism itself is reported | Per-thread accounting, % of all host cores |
+| C1 | Critical frame completes before its scanout deadline | 60 Hz panel: 16.67 ms period |
+| C2 | C1 holds while the guest's GPU load is swept from idle to saturation | Sweep in declared steps; saturation = guest workload GPU-bound with no frame pacing |
+| C3 | Deadline-miss ratio below a declared bound, with misses attributed | Bound declared per run, never inferred from data |
+| C4 | The guest is not starved: its throughput under arbitration is reported against its unarbitrated throughput | Reported, not pass/fail |
+| C5 | After a guest burst ends, the critical domain returns to zero misses within a declared number of frames | Declared per run |
+| C6 | The cost of the arbitration mechanism itself is reported | Per-thread CPU accounting, % of all host cores |
 
 **Physical-AI variant.** The same shape with a different critical job: a
 perception inference job with a period and a deadline, sharing the GPU with
 non-critical rendering or batch inference. The method, victim family and
 verdict mapping are identical; only the victim workload changes. Both
-variants are in scope; the cockpit variant runs first because its deadline
+variants are in scope; the display variant runs first because its deadline
 is externally fixed by the display.
 
 ## Scope sketch
@@ -110,8 +111,8 @@ is externally fixed by the display.
 
 ## Testbed
 
-- **Platform 1 (first):** a retail board with an Arm Mali Valhall CSF GPU
-  (e.g. RK3588-class), mainline Linux, upstream Panthor + Mesa PanVK, KVM,
+- **Platform 1 (first):** a retail board with an Arm Mali Valhall CSF GPU,
+  mainline Linux, upstream Panthor + Mesa PanVK, KVM,
   and an upstream VMM (crosvm or QEMU) with a Vulkan-forwarding
   virtio-gpu backend. Fully open accelerator path (Spec §5).
 - **Platform 2 (candidate):** a board whose GPU has ring-level hardware
